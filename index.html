@@ -2,261 +2,144 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no",interactive-widget=resizes-content>
-
-    <title>謎解き2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>謎解きゲーム</title>
     <style>
-        input[type="text"] {
-           font-size: 16px;
-        }
-
         body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow-x: hidden;
-            overflow-y: hidden;
-            touch-action: manipulation;
-        }
-
-        #title-image {
-            width: 100%;
-            max-width: 100%;
-            height: auto;
-            margin-bottom: 15px;
-            margin-top: 30px
-        }
-
-        #quiz-container {
-            background-color: white;
-            max-width: 380px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            font-family: Arial, sans-serif;
             text-align: center;
-            box-sizing: border-box;
-            left:  0;
-            right: 0;
-            margin-top: 100px
+            background-color: #f0f0f0;
         }
-
-        #question-image {
-            width: 346px;
-            height: 244px;
-            object-fit: cover;
-            margin-bottom: 15px;
+        #game-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-
-        input[type="text"] {
-            width: 80%;
-            padding: 10px;
-            margin: 10px 0;
-        }
-
-        button {
-            width: 60px;
-            height: 40px;
-            padding: 20px 40px;
-            margin: 5px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        #result-message {
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        .rank {
+        #timer {
             font-size: 24px;
-            font-weight: bold;
-            margin-top: 10px;
+            margin-bottom: 20px;
         }
-
-        .incorrect {
-            color: red;
-            font-weight: bold;
+        #question-image {
+            max-width: 100%;
+            margin-bottom: 20px;
+        }
+        #answer-input {
+            font-size: 18px;
+            padding: 5px;
+            margin-right: 10px;
+        }
+        button {
+            font-size: 18px;
+            padding: 5px 15px;
+            cursor: pointer;
+        }
+        #result {
+            font-size: 24px;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <div id="quiz-container">
-        <div id="start-screen">
-            <img id="title-image" src="./0.png" alt="タイトル画像">
-            <input type="text" id="name-input" placeholder="名前を入力してください">
-            <button id="start-btn">開始</button>
-        </div>
-
-        <div id="quiz-screen" style="display: none;">
-            <div id="timer">残り時間: 10:00</div>
-            <div id="quiz-area">
-                <img id="question-image" src="" alt="問題画像">
-            </div>
-            <input type="text" id="answer-input" placeholder="回答を入力">
-            <button id="back-btn">戻る</button>
-            <button id="submit-btn">送信</button>
-            <p id="result-message"></p>
-        </div>
-        <div id="finish-screen" style="display: none;">
-            <p id="finish-result"></p>
-            <button id="restart-btn">終了</button>
-        </div>
+    <div id="game-container">
+        <h1>謎解きゲーム</h1>
+        <div id="timer">残り時間: <span id="time-left">40</span>秒</div>
+        <img id="question-image" src="" alt="問題画像">
+        <input type="text" id="answer-input" placeholder="答えを入力">
+        <button id="submit-btn">判定</button>
+        <button id="start-btn">開始</button>
+        <div id="result"></div>
     </div>
 
     <script>
-        // 制限時間を設定（秒単位）
-        const TIME_LIMIT = 600; // 10分 = 600秒
-
-        window.addEventListener('resize', function() {
-            if (document.activeElement.tagName === 'INPUT') {
-                window.setTimeout(function() {
-                    document.activeElement.scrollIntoView();
-                }, 0);
-            }
-        });
-
         const questions = [
-            { image: './1.png', answer: ['きのこ', 'キノコ'] },
-            { image: './2.png', answer: ['あいす', 'アイス'] },
-            { image: './3.png', answer: ['だむ', 'ダム'] },
-            { image: './4.png', answer: ['まえば', 'マエバ'] },
-            { image: './5.png', answer: ['からす', 'カラス'] },
-            { image: './6.png', answer: ['よもぎ', 'ヨモギ'] },
-            { image: './7.png', answer: ['うに', 'ウニ'] },
-            { image: './8.png', answer: ['しりとり', 'シリトリ'] },
+            { image: "1.jpg", answer: "答え1" },
+            { image: "2.jpg", answer: "答え2" },
+            { image: "3.jpg", answer: "答え3" },
+            { image: "4.jpg", answer: "答え4" },
+            { image: "5.jpg", answer: "答え5" },
+            { image: "6.jpg", answer: "答え6" },
+            { image: "7.jpg", answer: "答え7" },
+            { image: "8.jpg", answer: "答え8" }
         ];
 
         let currentQuestion = 0;
-        let startTime;
-        let timerInterval;
-        let answers = [];
-        let solvedQuestions = new Set();
-        let playerName = '';
-        let remainingTime = TIME_LIMIT;
+        let score = 0;
+        let timer;
 
-        const startScreen = document.getElementById('start-screen');
-        const quizScreen = document.getElementById('quiz-screen');
-        const finishScreen = document.getElementById('finish-screen');
-        const nameInput = document.getElementById('name-input');
-        const startBtn = document.getElementById('start-btn');
-        const quizArea = document.getElementById('quiz-area');
-        const questionImage = document.getElementById('question-image');
-        const answerInput = document.getElementById('answer-input');
-        const submitBtn = document.getElementById('submit-btn');
-        const backBtn = document.getElementById('back-btn');
-        const resultMessage = document.getElementById('result-message');
-        const timerDisplay = document.getElementById('timer');
-        const finishResult = document.getElementById('finish-result');
-        const restartBtn = document.getElementById('restart-btn');
+        const startBtn = document.getElementById("start-btn");
+        const submitBtn = document.getElementById("submit-btn");
+        const answerInput = document.getElementById("answer-input");
+        const questionImage = document.getElementById("question-image");
+        const timeLeft = document.getElementById("time-left");
+        const result = document.getElementById("result");
 
-        startBtn.addEventListener('click', () => {
-            playerName = nameInput.value.trim();
-            if (!playerName) {
-                playerName = 'ななし';
-            }
-            startScreen.style.display = 'none';
-            quizScreen.style.display = 'block';
-            startQuiz();
-        });
+        startBtn.addEventListener("click", startGame);
+        submitBtn.addEventListener("click", checkAnswer);
 
-        function startQuiz() {
-            startTime = new Date().getTime();
-            timerInterval = setInterval(updateTimer, 1000);
-            showQuestion(currentQuestion);
-        }
-
-        function showQuestion(index) {
-            const question = questions[index];
-            questionImage.src = question.image;
-            
-            if (solvedQuestions.has(index)) {
-                answerInput.value = answers[index];
-                answerInput.disabled = true;
-                resultMessage.textContent = '正解済み';
-                resultMessage.className = '';
-            } else {
-                answerInput.value = '';
-                answerInput.disabled = false;
-                resultMessage.textContent = '';
-                resultMessage.className = '';
-            }
-        }
-
-        function updateTimer() {
-            remainingTime--;
-            if (remainingTime <= 0) {
-                clearInterval(timerInterval);
-                finishQuiz(true);
-            } else {
-                const minutes = Math.floor(remainingTime / 60);
-                const seconds = remainingTime % 60;
-                timerDisplay.textContent = `残り時間: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            }
-        }
-
-        submitBtn.addEventListener('click', () => {
-          const userAnswer = answerInput.value.trim();
-          if (questions[currentQuestion].answer.includes(userAnswer)) {
-            answers[currentQuestion] = userAnswer;
-            solvedQuestions.add(currentQuestion);
-            currentQuestion++;
-            if (currentQuestion < questions.length) {
-              showQuestion(currentQuestion);
-            } else {
-              finishQuiz();
-            }
-          } else {
-            resultMessage.textContent = 'ちがうよ';
-            resultMessage.className = 'incorrect';
-          }
-        });
-
-        backBtn.addEventListener('click', () => {
-            if (currentQuestion > 0) {
-                currentQuestion--;
-                showQuestion(currentQuestion);
-            }
-        });
-
-        function getRank(time) {
-            const elapsedSeconds = TIME_LIMIT - time;
-            
-            if (elapsedSeconds <= TIME_LIMIT * 0.2) return 'SS';
-            if (elapsedSeconds <= TIME_LIMIT * 0.4) return 'S';
-            if (elapsedSeconds <= TIME_LIMIT * 0.6) return 'A';
-            if (elapsedSeconds <= TIME_LIMIT * 0.8) return 'B';
-            return 'C';
-        }
-        
-        function finishQuiz(isTimeUp = false) {
-            clearInterval(timerInterval);
-            const elapsedTime = TIME_LIMIT - remainingTime;
-            const minutes = Math.floor(elapsedTime / 60);
-            const seconds = elapsedTime % 60;
-            const finalTime = isTimeUp ? "時間切れ" : `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            const rank = getRank(remainingTime);
-            
-            quizScreen.style.display = 'none';
-            finishScreen.style.display = 'block';
-            finishResult.innerHTML = `
-                <p>名前: ${playerName}</p>
-                <p>タイム: ${finalTime}</p>
-                <p class="rank">ランク: ${rank}</p>
-            `;
-        }
-
-        restartBtn.addEventListener('click', resetQuiz);
-
-        function resetQuiz() {
+        function startGame() {
             currentQuestion = 0;
-            answers = [];
-            solvedQuestions.clear();
-            remainingTime = TIME_LIMIT;
-            finishScreen.style.display = 'none';
-            startScreen.style.display = 'block';
+            score = 0;
+            startBtn.style.display = "none";
+            submitBtn.style.display = "inline";
+            answerInput.style.display = "inline";
+            result.textContent = "";
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (currentQuestion < questions.length) {
+                questionImage.src = questions[currentQuestion].image;
+                answerInput.value = "";
+                const timeLimit = currentQuestion === questions.length - 1 ? 120 : 40;
+                timeLeft.textContent = timeLimit;
+                startTimer(timeLimit);
+            } else {
+                endGame();
+            }
+        }
+
+        function startTimer(duration) {
+            clearInterval(timer);
+            let time = duration;
+            timer = setInterval(() => {
+                timeLeft.textContent = time;
+                if (time <= 0) {
+                    clearInterval(timer);
+                    currentQuestion++;
+                    showQuestion();
+                }
+                time--;
+            }, 1000);
+        }
+
+        function checkAnswer() {
+            const userAnswer = answerInput.value.trim().toLowerCase();
+            const correctAnswer = questions[currentQuestion].answer.toLowerCase();
+            if (userAnswer === correctAnswer) {
+                score += currentQuestion === questions.length - 1 ? 30 : 10;
+            }
+            result.textContent = userAnswer === correctAnswer ? "正解!" : "不正解";
+        }
+
+        function endGame() {
+            clearInterval(timer);
+            submitBtn.style.display = "none";
+            answerInput.style.display = "none";
+            questionImage.style.display = "none";
+            result.textContent = `ゲーム終了! あなたのスコア: ${score}点\nランク: ${getRank(score)}`;
+            startBtn.style.display = "inline";
+            startBtn.textContent = "もう一度プレイ";
+        }
+
+        function getRank(score) {
+            if (score === 100) return "SS";
+            if (score >= 70) return "S";
+            if (score >= 40) return "A";
+            if (score >= 10) return "B";
+            return "C";
         }
     </script>
 </body>
