@@ -94,7 +94,7 @@
 
 
         startBtn.addEventListener('click', () => {
-            playerName = nameInput.value.trim();
+            playerName = playerNameInput.value.trim();
             if (!playerName) {
                 playerName = 'ななし';
             }
@@ -102,7 +102,7 @@
             quizScreen.style.display = 'block';
             startQuiz();
         });
-
+        
         function startQuiz() {
             showQuestion(currentQuestion);
             timerInterval = setInterval(updateTimer, 1000);
