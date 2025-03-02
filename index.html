@@ -93,13 +93,15 @@
         let timerInterval;
         let remainingTime = QUESTION_TIME_LIMIT;
 
+
         startBtn.addEventListener('click', () => {
-            playerName = playerNameInput.value.trim();
-            if (playerName) {
-                startScreen.style.display = 'none';
-                quizScreen.style.display = 'block';
-                startQuiz();
+            playerName = nameInput.value.trim();
+            if (!playerName) {
+                playerName = 'ななし';
             }
+            startScreen.style.display = 'none';
+            quizScreen.style.display = 'block';
+            startQuiz();
         });
 
         function startQuiz() {
