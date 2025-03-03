@@ -109,11 +109,13 @@
         }
 
         function showQuestion(index) {
-            questionImage.src = questions[index].image;
+            const question = questions[index];
+            questionImage.src = question.image;
+            
             answerInput.value = '';
+            answerInput.disabled = false;
             resultMessage.textContent = '';
-            remainingTime = QUESTION_TIME_LIMIT;
-            timerDisplay.textContent = `残り時間: ${remainingTime}秒`;
+            resultMessage.className = '';
         }
 
         function updateTimer() {
@@ -152,7 +154,7 @@
             resultMessage.className = 'incorrect';
           }
         });
-
+            
         function finishQuiz() {
             clearInterval(timerInterval);
             const solvedCount = solvedQuestions.size;
