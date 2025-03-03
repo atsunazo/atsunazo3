@@ -110,6 +110,8 @@
         
         function startQuiz() {
             showQuestion(currentQuestion);
+            remainingTime = QUESTION_TIME_LIMIT;
+            timerDisplay.textContent = `残り時間: ${remainingTime}秒`;
             timerInterval = setInterval(updateTimer, 1000);
         }
 
