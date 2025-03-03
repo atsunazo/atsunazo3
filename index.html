@@ -37,6 +37,11 @@
             height: auto;
             margin-bottom: 20px;
         }
+        .time-warning {
+            color: red;
+            font-weight: bold;
+        }
+
     </style>
 </head>
 <body>
@@ -125,15 +130,23 @@
                 moveToNextQuestion();
             } else {
                 timerDisplay.textContent = `残り時間: ${remainingTime}秒`;
+                if (remainingTime <= 10) {
+                    timerDisplay.classList.add('time-warning');
+                } else {
+                    timerDisplay.classList.remove('time-warning');
+                }
             }
         }
+
         
         function resetTimer() {
             clearInterval(timerInterval);
             remainingTime = QUESTION_TIME_LIMIT;
             timerDisplay.textContent = `残り時間: ${remainingTime}秒`;
+            timerDisplay.classList.remove('time-warning');
             timerInterval = setInterval(updateTimer, 1000);
         }
+
         
         function moveToNextQuestion() {
             currentQuestion++;
