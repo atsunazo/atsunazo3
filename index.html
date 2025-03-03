@@ -111,7 +111,7 @@
         function showQuestion(index) {
             const question = questions[index];
             questionImage.src = question.image;
-            
+            submitBtn.disabled = false;  // 判定ボタンを有効化
             answerInput.value = '';
             answerInput.disabled = false;
             resultMessage.textContent = '';
