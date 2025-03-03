@@ -127,14 +127,20 @@
                 timerDisplay.textContent = `残り時間: ${remainingTime}秒`;
             }
         }
-
+        
+        function resetTimer() {
+            clearInterval(timerInterval);
+            remainingTime = QUESTION_TIME_LIMIT;
+            timerDisplay.textContent = `残り時間: ${remainingTime}秒`;
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+        
         function moveToNextQuestion() {
             currentQuestion++;
             if (currentQuestion < questions.length) {
-                remainingTime = QUESTION_TIME_LIMIT;
                 showQuestion(currentQuestion);
-                clearInterval(timerInterval);
-                timerInterval = setInterval(updateTimer, 1000);
+                resetTimer();
+                submitBtn.disabled = false;
             } else {
                 finishQuiz();
             }
